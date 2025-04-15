@@ -4,6 +4,7 @@ const path = require('path');
 const cron = require('node-cron');
 const config = require('./config');
 const db = require('./database');
+const express = require('express');
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -16,6 +17,16 @@ const app = new App({
   signingSecret: config.slack.signingSecret,
   socketMode: true,
   appToken: config.slack.appToken,
+});
+
+// Create an Express app for handling HTTP requests
+const expressApp = express();
+expressApp.get('/', (req, res) => {
+  res.send('Daily Question Bot is running!');
+});
+
+expressApp.get('/health', (req, res) => {
+  res.send('OK');
 });
 
 // Function to generate a question using OpenAI
@@ -115,7 +126,16 @@ app.command('/ask-daily-question', async ({ command, ack, respond }) => {
 // Start the app
 (async () => {
   const port = process.env.PORT || 3000;
-  await app.start(port);
-  console.log(`⚡️ Daily Question Bot is running on port ${port}!`);
+  
+  // Start the Slack app
+  await app.start();
+  console.log(`⚡️ Slack Bot connected and running!`);
+  
+  // Start the Express HTTP server
+  expressApp.listen(port, () => {
+    console.log(`HTTP server listening on port ${port}!`);
+  });
+  
+  // Schedule the daily question
   scheduleDailyQuestion();
 })(); 

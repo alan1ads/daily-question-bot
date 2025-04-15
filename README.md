@@ -78,7 +78,12 @@ npm run test:full       # Test full workflow
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
    - **Environment Variables**: Add all your environment variables from your .env file
+   - **Important**: Make sure the `PORT` environment variable is set (Render sets this automatically)
 5. Deploy your service
+
+The application includes an Express web server that listens on the specified port, which is required for Render.com web services. It provides simple endpoints:
+- `/` - Returns a simple status message
+- `/health` - Health check endpoint for monitoring
 
 You can also use the included `render.yaml` file for Blueprint deployments:
 ```
