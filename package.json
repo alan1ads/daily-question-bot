@@ -1,0 +1,25 @@
+{
+  "name": "daily-question-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "setup": "node setup.js",
+    "test:question": "node test-question.js",
+    "test:slack": "node test-slack.js",
+    "test:full": "node test-full.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "A Slack bot that posts daily AI-generated questions to encourage team engagement",
+  "dependencies": {
+    "@slack/bolt": "^3.17.1",
+    "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "openai": "^4.28.4"
+  }
+}
