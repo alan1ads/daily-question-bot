@@ -44,20 +44,32 @@ const generateQuestion = async () => {
 };
 
 // Function to generate a unique question (retry if duplicate)
-const generateUniqueQuestion = async (maxAttempts = 5) => {
+const generateUniqueQuestion = async (maxAttempts = 10) => {
   let attempts = 0;
   
   while (attempts < maxAttempts) {
+    attempts++;
+    console.log(`Attempt ${attempts}/${maxAttempts} to generate a unique question`);
+    
     const question = await generateQuestion();
     
-    if (question && await db.isQuestionUnique(question)) {
-      return question;
+    if (!question) {
+      console.error('Failed to generate question from OpenAI');
+      continue;
     }
     
-    console.log(`Generated a duplicate question, retrying... (Attempt ${attempts + 1}/${maxAttempts})`);
-    attempts++;
+    console.log(`Generated question: "${question.substring(0, 50)}..."`);
+    
+    const isUnique = await db.isQuestionUnique(question);
+    if (isUnique) {
+      console.log('Question is unique! Proceeding to post');
+      return question;
+    } else {
+      console.log('Question is a duplicate (exact match or thematically similar). Trying again...');
+    }
   }
   
+  console.error(`Failed to generate a unique question after ${maxAttempts} attempts`);
   return null;
 };
 

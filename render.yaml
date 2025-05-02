@@ -22,4 +22,10 @@ services:
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
-        sync: false 
+        sync: false
+      - key: SIMILARITY_THRESHOLD
+        value: "0.85"
+      - key: EMBEDDING_MODEL
+        value: "text-embedding-3-small"
+      - key: MIN_QUESTIONS_FOR_CHECK
+        value: "5" 

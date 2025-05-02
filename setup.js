@@ -27,6 +27,11 @@ QUESTION_TIME=9:00 # Time to send the daily question (24-hour format in EST)
 # Supabase Configuration
 SUPABASE_URL=
 SUPABASE_KEY=
+
+# Similarity Detection Configuration
+SIMILARITY_THRESHOLD=0.85 # Value between 0-1, higher = more strict (require more similarity to detect as duplicate)
+EMBEDDING_MODEL=text-embedding-3-small # OpenAI embedding model to use
+MIN_QUESTIONS_FOR_CHECK=5 # Minimum number of past questions required before enabling similarity checks
 `;
 
 // Questions to ask
@@ -63,6 +68,21 @@ const questions = [
   {
     prompt: 'Enter your Supabase Anon Key:',
     key: 'SUPABASE_KEY'
+  },
+  {
+    prompt: 'Enter similarity threshold for duplicate detection (0-1, higher is more strict, default 0.85):',
+    key: 'SIMILARITY_THRESHOLD',
+    default: '0.85'
+  },
+  {
+    prompt: 'Enter OpenAI embedding model to use (default text-embedding-3-small):',
+    key: 'EMBEDDING_MODEL',
+    default: 'text-embedding-3-small'
+  },
+  {
+    prompt: 'Enter minimum questions required before similarity check (default 5):',
+    key: 'MIN_QUESTIONS_FOR_CHECK',
+    default: '5'
   }
 ];
 

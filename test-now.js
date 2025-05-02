@@ -1,10 +1,8 @@
+// Simple script to test posting a daily question right now
 const { App } = require('@slack/bolt');
-const { OpenAI } = require('openai');
-const path = require('path');
-const cron = require('node-cron');
 const config = require('./config');
 const db = require('./database');
-const express = require('express');
+const { OpenAI } = require('openai');
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -17,16 +15,6 @@ const app = new App({
   signingSecret: config.slack.signingSecret,
   socketMode: true,
   appToken: config.slack.appToken,
-});
-
-// Create an Express app for handling HTTP requests
-const expressApp = express();
-expressApp.get('/', (req, res) => {
-  res.send('Daily Question Bot is running!');
-});
-
-expressApp.get('/health', (req, res) => {
-  res.send('OK');
 });
 
 // Function to generate a question using OpenAI
@@ -110,44 +98,21 @@ const postDailyQuestion = async () => {
   }
 };
 
-// Schedule the daily question
-const scheduleDailyQuestion = () => {
-  // Parse the scheduled time
-  const [hour, minute] = config.schedule.questionTime.split(':');
-  
-  // Schedule the cron job to run daily at the specified time
-  // Format: minute hour * * * (Monday-Sunday)
-  const cronSchedule = `${minute} ${hour} * * 1-5`; // Monday to Friday
-  
-  console.log(`Scheduled daily question for ${hour}:${minute} EST on weekdays`);
-  
-  // Set timezone to Eastern Time
-  cron.schedule(cronSchedule, postDailyQuestion, {
-    scheduled: true,
-    timezone: config.schedule.timezone
-  });
-};
-
-// Manual command to post a question immediately (useful for testing)
-app.command('/ask-daily-question', async ({ command, ack, respond }) => {
-  await ack();
-  await postDailyQuestion();
-  await respond('Daily question has been posted!');
-});
-
-// Start the app
+// Run this when executed directly
 (async () => {
-  const port = process.env.PORT || 3000;
-  
-  // Start the Slack app
-  await app.start();
-  console.log(`⚡️ Slack Bot connected and running!`);
-  
-  // Start the Express HTTP server
-  expressApp.listen(port, () => {
-    console.log(`HTTP server listening on port ${port}!`);
-  });
-  
-  // Schedule the daily question
-  scheduleDailyQuestion();
+  try {
+    // Start the Slack app
+    await app.start();
+    console.log('⚡️ Slack app connected');
+    
+    // Post a daily question immediately
+    console.log('Testing daily question functionality...');
+    await postDailyQuestion();
+    console.log('Test complete! Check your Slack channel');
+    
+    // Shut down the app after testing
+    await app.stop();
+  } catch (error) {
+    console.error('Error during test:', error);
+  }
 })(); 

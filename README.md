@@ -6,7 +6,7 @@ A Node.js application that posts a daily question to a Slack channel. The bot us
 
 - Daily question posting on a schedule (default: weekdays at 9:00 AM EST)
 - AI-generated engaging questions via OpenAI
-- Duplicate question detection
+- Advanced duplicate detection using semantic similarity (prevents thematically similar questions)
 - Slack integration with threading support
 - Manual trigger via Slack slash command
 - Persistent storage with Supabase
@@ -116,7 +116,24 @@ When deploying to production:
 ## How It Works
 
 1. At the scheduled time (or when triggered manually), the bot generates a question using OpenAI
-2. It checks if the question has been asked before by comparing against the Supabase database
-3. If it's a duplicate, it tries again (up to 5 times)
+2. It performs two types of duplicate checks:
+   - **Exact Match**: Direct text comparison (case-insensitive)
+   - **Semantic Similarity**: Uses OpenAI embeddings to detect thematically similar questions (e.g., multiple "dinner party" questions)
+3. If a duplicate is detected (either exact or semantic), it tries again (up to 10 times)
 4. Once a unique question is found, it posts to the specified Slack channel
-5. The question is saved to the database to avoid future duplicates 
+5. The question is saved to the database to avoid future duplicates
+
+## Configuration
+
+You can configure several aspects of the bot by setting environment variables:
+
+### General Configuration
+- `QUESTION_TIME`: Time to send daily questions (24-hour format, default: "9:00")
+- `SLACK_CHANNEL_ID`: ID of the Slack channel to post questions to
+
+### Semantic Similarity Configuration
+- `SIMILARITY_THRESHOLD`: Value between 0-1 controlling how strict similarity detection is (default: 0.85)
+  - Higher values (closer to 1) require more similarity to flag as duplicate
+  - Lower values (closer to 0) are more aggressive at filtering similar questions
+- `EMBEDDING_MODEL`: OpenAI embedding model to use (default: "text-embedding-3-small")
+- `MIN_QUESTIONS_FOR_CHECK`: Minimum number of past questions needed before similarity checks run (default: 5) 

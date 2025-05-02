@@ -1,8 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
 const config = require('./config');
+const { OpenAI } = require('openai');
 
 // Initialize Supabase client
 const supabase = createClient(config.supabase.url, config.supabase.key);
+
+// Initialize OpenAI client for embeddings
+const openai = new OpenAI({
+  apiKey: config.openai.apiKey
+});
+
+// Get similarity settings from config
+const SIMILARITY_THRESHOLD = config.similarity.threshold;  
+const EMBEDDING_MODEL = config.similarity.model;
+const MIN_QUESTIONS_FOR_CHECK = config.similarity.minQuestionsForCheck;
 
 /**
  * Initialize the database and create tables if they don't exist
@@ -69,10 +80,92 @@ const getPastQuestions = async () => {
 };
 
 /**
- * Check if a question is unique
+ * Generate an embedding for a text string using OpenAI
+ */
+const generateEmbedding = async (text) => {
+  try {
+    const response = await openai.embeddings.create({
+      model: EMBEDDING_MODEL,
+      input: text,
+    });
+    
+    return response.data[0].embedding;
+  } catch (error) {
+    console.error('Error generating embedding:', error);
+    return null;
+  }
+};
+
+/**
+ * Calculate cosine similarity between two vectors
+ * Returns a value from 0 to 1, where 1 is identical
+ */
+const calculateCosineSimilarity = (vecA, vecB) => {
+  // Calculate dot product
+  let dotProduct = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+  }
+  
+  // Calculate magnitudes
+  let magA = 0;
+  let magB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    magA += vecA[i] * vecA[i];
+    magB += vecB[i] * vecB[i];
+  }
+  
+  magA = Math.sqrt(magA);
+  magB = Math.sqrt(magB);
+  
+  // Calculate cosine similarity
+  if (magA === 0 || magB === 0) return 0;
+  return dotProduct / (magA * magB);
+};
+
+/**
+ * Check if a question is semantically similar to any existing questions
+ */
+const isSemanticallySimilar = async (newQuestion, pastQuestions) => {
+  try {
+    // Generate embedding for the new question
+    const newEmbedding = await generateEmbedding(newQuestion);
+    if (!newEmbedding) return false;
+    
+    // Check similarity against each past question
+    for (const pastQuestion of pastQuestions) {
+      // Generate embedding for past question
+      const pastEmbedding = await generateEmbedding(pastQuestion.question);
+      if (!pastEmbedding) continue;
+      
+      // Calculate similarity
+      const similarity = calculateCosineSimilarity(newEmbedding, pastEmbedding);
+      
+      // Log similarity for debugging (can remove later)
+      console.log(`Similarity [${similarity.toFixed(2)}] between:
+        New: ${newQuestion.substring(0, 50)}...
+        Old: ${pastQuestion.question.substring(0, 50)}...`);
+      
+      // Check if similarity exceeds threshold
+      if (similarity >= SIMILARITY_THRESHOLD) {
+        console.log(`Thematic duplicate detected! Similarity score: ${similarity.toFixed(2)}`);
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking semantic similarity:', error);
+    return false;
+  }
+};
+
+/**
+ * Check if a question is unique (not a duplicate)
  */
 const isQuestionUnique = async (question) => {
   try {
+    // First check for exact text matches (case-insensitive)
     const { data, error } = await supabase
       .from('questions')
       .select('id')
@@ -84,7 +177,26 @@ const isQuestionUnique = async (question) => {
       return true; // Assume unique on error to continue operation
     }
     
-    return !data || data.length === 0;
+    // If there's an exact match, it's not unique
+    if (data && data.length > 0) {
+      console.log('Exact duplicate detected!');
+      return false;
+    }
+    
+    // If no exact match, check for semantic similarity
+    const pastQuestions = await getPastQuestions();
+    
+    // If we have fewer than MIN_QUESTIONS_FOR_CHECK past questions, don't do similarity check yet
+    if (pastQuestions.length < MIN_QUESTIONS_FOR_CHECK) {
+      console.log(`Only ${pastQuestions.length} past questions found. Need at least ${MIN_QUESTIONS_FOR_CHECK} for similarity check.`);
+      return true;
+    }
+    
+    // Check for semantic similarity with past questions
+    const isSimilar = await isSemanticallySimilar(question, pastQuestions);
+    
+    // Return true if not similar, false if similar (false = not unique)
+    return !isSimilar;
   } catch (error) {
     console.error('Error checking if question is unique:', error);
     return true; // Assume unique on error to continue operation
