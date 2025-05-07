@@ -8,6 +8,13 @@
     "test:question": "node test-question.js",
     "test:slack": "node test-slack.js",
     "test:full": "node test-full.js",
+    "test:similarity": "node test-similarity.js",
+    "test:db": "node test-db.js",
+    "check-duplicates": "node check-duplicates.js",
+    "check-supabase": "node check-supabase.js",
+    "check-env": "node check-env.js",
+    "test:query": "node simple-query-test.js",
+    "seed-database": "node seed-database.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

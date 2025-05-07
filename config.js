@@ -19,7 +19,7 @@ const config = {
     key: process.env.SUPABASE_KEY
   },
   similarity: {
-    threshold: parseFloat(process.env.SIMILARITY_THRESHOLD || '0.85'),
+    threshold: parseFloat(process.env.SIMILARITY_THRESHOLD || '0.80'),
     model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
     minQuestionsForCheck: parseInt(process.env.MIN_QUESTIONS_FOR_CHECK || '5')
   }

@@ -44,7 +44,7 @@ const generateQuestion = async () => {
 };
 
 // Function to generate a unique question (retry if duplicate)
-const generateUniqueQuestion = async (maxAttempts = 10) => {
+const generateUniqueQuestion = async (maxAttempts = 12) => {
   let attempts = 0;
   
   while (attempts < maxAttempts) {

@@ -62,6 +62,23 @@ const createTables = async () => {
  */
 const getPastQuestions = async () => {
   try {
+    console.log('Attempting to retrieve questions from Supabase...');
+    
+    // First, check if we can connect to the questions table
+    const { count, error: countError } = await supabase
+      .from('questions')
+      .select('*', { count: 'exact' });
+    
+    if (countError) {
+      console.error('Error checking question count:', countError);
+      console.error('Error code:', countError.code);
+      console.error('Error message:', countError.message);
+      console.error('Error details:', countError.details);
+    } else {
+      console.log(`Supabase reports ${count} questions in the table.`);
+    }
+    
+    // Then try to retrieve all questions
     const { data, error } = await supabase
       .from('questions')
       .select('*')
@@ -69,12 +86,23 @@ const getPastQuestions = async () => {
     
     if (error) {
       console.error('Error getting past questions:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
       return [];
+    }
+    
+    console.log(`Retrieved ${data ? data.length : 0} questions from database.`);
+    if (data && data.length > 0) {
+      console.log('First question:', data[0]);
+    } else {
+      console.log('No questions returned from database query.');
     }
     
     return data || [];
   } catch (error) {
     console.error('Error getting past questions:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     return [];
   }
 };
@@ -185,12 +213,10 @@ const isQuestionUnique = async (question) => {
     
     // If no exact match, check for semantic similarity
     const pastQuestions = await getPastQuestions();
+    console.log(`Found ${pastQuestions.length} past questions in the database.`);
     
-    // If we have fewer than MIN_QUESTIONS_FOR_CHECK past questions, don't do similarity check yet
-    if (pastQuestions.length < MIN_QUESTIONS_FOR_CHECK) {
-      console.log(`Only ${pastQuestions.length} past questions found. Need at least ${MIN_QUESTIONS_FOR_CHECK} for similarity check.`);
-      return true;
-    }
+    // Always perform similarity check regardless of question count
+    // Remove the minimum question check to prevent similar questions being posted
     
     // Check for semantic similarity with past questions
     const isSimilar = await isSemanticallySimilar(question, pastQuestions);
