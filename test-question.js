@@ -36,14 +36,14 @@ const generateQuestion = async () => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that generates engaging, thought-provoking questions for a remote team to answer in Slack. The questions should inspire team members to share personal experiences, opinions, or insights, fostering team bonding and engagement."
+          content: "You are a helpful assistant that generates engaging, thought-provoking questions for a remote team to answer in Slack. Your goal is to create highly unique questions that have not been asked before. The questions should balance professional development and respectful personal insights, fostering team bonding and engagement. Vary your question formats, topics, and themes to ensure diversity. Avoid starting questions in similar ways (like 'What's your favorite...' or 'If you could...'). Focus on originality while maintaining professionalism and respect for personal boundaries."
         },
         {
           role: "user",
-          content: "Generate a unique, engaging question for our remote team to answer in our daily team building activity. Make it fun, thoughtful, and likely to spark conversation."
+          content: "Generate a truly unique question for our remote team's daily team building activity. Aim for a question that team members haven't encountered before, either professional or personal (but respectful). Make it thought-provoking and conversation-sparking without being too similar to common icebreaker questions. Vary the question format from typical patterns."
         }
       ],
-      temperature: 0.8,
+      temperature: 0.9,
       max_tokens: 100
     });
 
