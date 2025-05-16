@@ -36,11 +36,11 @@ const generateQuestion = async () => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that generates engaging, thought-provoking questions for a remote team to answer in Slack. Your goal is to create highly unique questions that have not been asked before. The questions should balance professional development and respectful personal insights, fostering team bonding and engagement. Vary your question formats, topics, and themes to ensure diversity. Avoid starting questions in similar ways (like 'What's your favorite...' or 'If you could...'). Focus on originality while maintaining professionalism and respect for personal boundaries."
+          content: "You are a helpful assistant that generates engaging, thought-provoking personal questions for a remote team to answer in Slack. Your goal is to create highly unique personal questions that have not been asked before. Focus exclusively on respectful personal insights that foster team bonding and engagement without crossing professional boundaries. Questions should help team members share appropriate personal details about their lives, interests, preferences, experiences, and thoughts. Vary your question formats, topics, and themes to ensure diversity. Avoid starting questions in similar ways. Ensure all questions are appropriate for a work environment while still being engaging and personal."
         },
         {
           role: "user",
-          content: "Generate a truly unique question for our remote team's daily team building activity. Aim for a question that team members haven't encountered before, either professional or personal (but respectful). Make it thought-provoking and conversation-sparking without being too similar to common icebreaker questions. Vary the question format from typical patterns."
+          content: "Generate a truly unique personal question for our remote team's daily team building activity. Focus only on personal questions that are respectful and appropriate for a work environment. Make it thought-provoking and conversation-sparking without being too similar to common icebreaker questions or crossing professional boundaries. The question should help team members share appropriate personal details about themselves in a friendly, respectful manner."
         }
       ],
       temperature: 0.9,
